@@ -1,1 +1,1 @@
-ici se trouve vos résultats de recherche sauvegardés.
+ici se trouvent vos résultats de recherche sauvegardés.
