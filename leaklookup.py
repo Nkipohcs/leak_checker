@@ -52,7 +52,18 @@ def save_api_keys():
         for key in api_keys:
             file.write(key + '\n')
 
-import os
+def perform_another_search():
+    choice = input("Voulez-vous effectuer une nouvelle recherche? (Oui/Non) ").lower()
+    
+    if choice == "oui":
+        str_matrix("Entrez la recherche souhaitée ")
+        query = input(": ")
+        send_and_print_request(api_key, query)
+    else:
+        sys.exit(0)
+
+# N'oubliez pas d'importer sys en haut du fichier
+import sys
 
 def save_search_results(query, total_results, formatted_output):
     # Demande à l'utilisateur s'il souhaite enregistrer le résultat
@@ -103,7 +114,7 @@ if not api_keys or not any(validate_api_key(key) for key in api_keys):
     save_api_keys()
 
 if args.addapi:
-    str_matrix("Veuillez saisir la nouvelle clé API à ajouter: ")
+    str_matrix("Veuillez saisir la nouvelle clé API à ajouter ")
     new_key = input(": ")
     if validate_api_key(new_key):
         add_api_key(new_key)
@@ -128,18 +139,16 @@ if args.listapi:
 
 api_key_index = 0
 api_key = api_keys[api_key_index] if api_keys else "" 
-
+query = 0
 url = "https://leak-lookup.com/api/search"
+
 str_matrix("Entrez la recherche souhaitée ")
 query = input(": ")
 
-# Paramètres de la requête
-
-
-def send_and_print_request(api_key):  
+def send_and_print_request(api_key, query):  
 
     total_results = 0
-    formatted_output = 0
+    formatted_output = ""
     file_path = os.path.join("saved_search", f"{query}.txt")
 
     params = {
@@ -171,13 +180,15 @@ def send_and_print_request(api_key):
             str_matrix(f"Nombre total de résultats : {total_results}\n")
             str_matrix(formatted_output)
             str_matrix("\n")
-        else:
+        elif data == {'error': 'false', 'message': []}:
+            str_matrix("Aucun résultat trouvé.\n")
+        elif data == {'error': 'true', 'message': 'REQUEST LIMIT REACHED'}:
             str_matrix("Nombre maximum de requêtes atteint.\n")
             next_key = get_next_api_key(api_key)
             if next_key:
                 api_key = next_key
                 str_matrix(f"Changement de clé API. Nouvelle clé: {api_key}\n")
-                send_and_print_request(api_key)
+                send_and_print_request(api_key, query)
                 break  # Continue la boucle avec la nouvelle clé API
             str_matrix("Veuillez saisir une nouvelle clé API valide: ")
             new_key = input(": ")
@@ -187,16 +198,27 @@ def send_and_print_request(api_key):
             add_api_key(new_key)
             api_key = new_key
             save_api_keys()
-            send_and_print_request(api_key)
+            send_and_print_request(api_key, query)
+        else:
+            next_key = get_next_api_key(api_key)
+            if next_key:
+                api_key = next_key
+                str_matrix(f"Changement de clé API. Nouvelle clé: {api_key}\n")
+                send_and_print_request(api_key, query)
+                break  # Continue la boucle avec la nouvelle clé API
+            str_matrix("Veuillez saisir une nouvelle clé API valide: ")
+            new_key = input(": ")
         break
     if not os.path.exists(file_path):
         save_search_results(query, total_results, formatted_output)
+        perform_another_search()
         sys.exit(0)
     else:
-        str_matrix("Recherche déjà sauvegardé.")
+        str_matrix("Recherche déjà sauvegardé.\n")
+        perform_another_search()
         sys.exit(0)
 
 
 
-send_and_print_request(api_key)
+send_and_print_request(api_key, query)
 print("\n")
