@@ -59,7 +59,7 @@ def str_matrix(message):
 
 api_keys = load_api_keys()
 
-parser = argparse.ArgumentParser(description="Recherchez des informations dans la base de données Leak Lookup.")
+parser = argparse.ArgumentParser(description="Recherchez des informations dans la base de données Leak Lookup via l'API")
 parser.add_argument("-addapi", action="store_true", help="Ajoutez une nouvelle clé API à la liste")
 parser.add_argument("-removeapi", action="store_true", help="Supprimez une clé de la liste")
 parser.add_argument("-listapi", action="store_true", help="Liste toutes les clés API enregistrées")
@@ -68,10 +68,10 @@ args = parser.parse_args()
 
 # Vérifiez si le fichier api_keys.txt est vide ou ne contient pas de clé API valide
 if not api_keys or not any(validate_api_key(key) for key in api_keys):
-    str_matrix("Votre fichier api_keys.txt est vide ou ne contient pas de clé API valide.")
+    str_matrix("Votre fichier api_keys.txt est vide ou ne contient pas de clé API valide.\n")
     new_key = ""
     while not validate_api_key(new_key):
-        str_matrix("Veuillez saisir une clé API valide: ")
+        str_matrix("Veuillez saisir une clé API valide ")
         new_key = input(": ")
     add_api_key(new_key)
     save_api_keys()
