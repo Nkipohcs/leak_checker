@@ -3,7 +3,7 @@ import json
 import argparse
 import time
 import os
-
+import sys
 
 API_KEYS_FILE = "api_keys.txt"
 
@@ -52,10 +52,36 @@ def save_api_keys():
         for key in api_keys:
             file.write(key + '\n')
 
+import os
+
+def save_search_results(query, total_results, formatted_output):
+    # Demande à l'utilisateur s'il souhaite enregistrer le résultat
+    choice = input("Souhaitez-vous enregistrer le résultat ? (oui/non) : ").strip().lower()
+
+    if choice == "oui":
+        # Vérifie si le dossier "saved_search" existe, sinon le crée
+        if not os.path.exists("saved_search"):
+            os.mkdir("saved_search")
+
+        # Définit le chemin du fichier de sortie
+        file_path = os.path.join("saved_search", f"{query}.txt")
+
+        # Écriture des résultats dans le fichier
+        with open(file_path, "w") as file:
+            file.write(f"Nombre total de résultats : {total_results}\n")
+            file.write(formatted_output)
+            file.write("\n")
+
+        print(f"Résultats sauvegardés dans {file_path}")
+    elif choice == "non":
+        print("Résultats non sauvegardés.")
+    else:
+        print("Choix non reconnu. Résultats non sauvegardés.")
+
 def str_matrix(message):
     for char in message:
         print(char, end='', flush=True)
-        time.sleep(0.033)
+        time.sleep(0.00333)
 
 api_keys = load_api_keys()
 
@@ -112,6 +138,10 @@ query = input(": ")
 
 def send_and_print_request(api_key):  
 
+    total_results = 0
+    formatted_output = 0
+    file_path = os.path.join("saved_search", f"{query}.txt")
+
     params = {
     "key": api_key,
     "type": "email_address",
@@ -140,6 +170,7 @@ def send_and_print_request(api_key):
             formatted_output = cleaned_response.replace(",", "\n")
             str_matrix(f"Nombre total de résultats : {total_results}\n")
             str_matrix(formatted_output)
+            str_matrix("\n")
         else:
             str_matrix("Nombre maximum de requêtes atteint.\n")
             next_key = get_next_api_key(api_key)
@@ -158,7 +189,14 @@ def send_and_print_request(api_key):
             save_api_keys()
             send_and_print_request(api_key)
         break
+    if not os.path.exists(file_path):
+        save_search_results(query, total_results, formatted_output)
+        sys.exit(0)
+    else:
+        str_matrix("Recherche déjà sauvegardé.")
+        sys.exit(0)
+
+
 
 send_and_print_request(api_key)
-
 print("\n")
