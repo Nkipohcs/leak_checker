@@ -52,6 +52,27 @@ def save_api_keys():
         for key in api_keys:
             file.write(key + '\n')
 
+def get_api_key_stats(api_key):
+    # URL pour l'endpoint stats de l'API
+    STATS_URL = "https://leak-lookup.com/api/stats"
+
+    # Paramètres pour la requête
+    params = {
+        "key": api_key
+    }
+
+    # Envoyer la requête
+    response = requests.post(STATS_URL, data=params)
+    data = json.loads(response.text)
+
+    # Vérifier si la réponse ne contient pas d'erreurs
+    if data["error"] == "false":
+        message = data["message"]
+        str_matrix("Requêtes pour cette clé: " + str(message["requests"]))
+        str_matrix("/" + str(message["limit"]) + "\n")
+    else:
+        str_matrix("Erreur : " + data["message"] + "\n")
+
 def perform_another_search():
     choice = input("Voulez-vous effectuer une nouvelle recherche? (Oui/Non) ").lower()
     
@@ -184,6 +205,7 @@ def send_and_print_request(api_key, query):
             str_matrix("Aucun résultat trouvé.\n")
         elif data == {'error': 'true', 'message': 'REQUEST LIMIT REACHED'}:
             str_matrix("Nombre maximum de requêtes atteint.\n")
+            get_api_key_stats(api_key)
             next_key = get_next_api_key(api_key)
             if next_key:
                 api_key = next_key
@@ -209,12 +231,15 @@ def send_and_print_request(api_key, query):
             str_matrix("Veuillez saisir une nouvelle clé API valide: ")
             new_key = input(": ")
         break
-    if not os.path.exists(file_path):
+
+    if not os.path.exists(file_path) and data != {'error': 'false', 'message': []}:
         save_search_results(query, total_results, formatted_output)
+        get_api_key_stats(api_key)
         perform_another_search()
         sys.exit(0)
     else:
         str_matrix("Recherche déjà sauvegardé.\n")
+        get_api_key_stats(api_key)
         perform_another_search()
         sys.exit(0)
 
