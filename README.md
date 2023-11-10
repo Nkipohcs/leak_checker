@@ -8,7 +8,7 @@ git clone https://github.com/Nkipohcs/leak_checker.git && cd leak_checker && pip
 
 usage: python3 leaklookup.py [-h] [-addapi] [-removeapi] [-listapi]
 
-Recherchez des informations dans la base de données Leak Lookup via l'API
+Recherchez des informations dans les base de données Leak Lookup via l'API
 
 options:
   -h, --help  show this help message and exit
